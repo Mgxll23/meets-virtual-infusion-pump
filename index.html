@@ -1105,9 +1105,9 @@ function startLibrary(){
 /* her pump: care unit -> alphabetical drug list that starts with ABC and IV fluid (no category step) */
 function herDrugList(ctx){
   const ds=availDrugs(ctx).slice().sort((a,b)=>a.s.localeCompare(b.s));
-  const items=[{t:'ABC',key:'A',act:()=>toast('Scroll ▼ to choose what to program')},
-    {t:'IV fluid',key:'A',act:()=>ivfFlow(ctx,'IV fluid')}];
-  if(ctx==='SEC') items.push({t:'antibiotic',key:'A',act:()=>ivfFlow(ctx,'antibiotic')});
+  const items=[{t:'ABC',key:'A',act:()=>toast('Scroll ▼ to choose what to program')}];
+  if(ctx==='SEC') items.push({t:'Intermittent (other)',key:'A',act:()=>ivfFlow(ctx,'Intermittent (other)')});
+  items.push({t:'IV fluid',key:'A',act:()=>ivfFlow(ctx,'IV fluid')});
   ds.forEach(d=>items.push({t:d.s,r:d.adv?'!':'',act:()=>pickDrug(d,ctx)}));
   go('list',listUi(unitLabel(S.unit),items,{alpha:true,tr:fmtDate()}));
 }
@@ -1987,7 +1987,7 @@ function bindPanel(){
 
 /* ---------- boot ---------- */
 window.addEventListener('DOMContentLoaded',()=>{
-  loadStore(); bindButtons(); bindPanel(); exam.init(); fit(); draw();
+  loadStore(); bindButtons(); bindPanel(); exam.init(); fit(); draw(); exam.start(0);
   setInterval(()=>{ tick(); draw(); },250);
   setInterval(()=>{ if(S.power==='on') save(); },5000);
   window.addEventListener('beforeunload',save);
@@ -2025,7 +2025,7 @@ function quickIvf(o){
 }
 const SCENARIOS=[
  {ret:true,id:'ret-full',title:'FULL DEMO: load line, prime, primary, secondary',
-  brief:'Pump is on with no line. Do the whole demo: open the door and load the line, confirm the giving set and prime, then program Med / Surg IV fluid 125 ml/h with VTBI 500 ml and start. Then set Back to PRIM to manual and add a secondary IV fluid of 260 ml/h, VTBI 130 ml, and start it.',
+  brief:'Pump is on with no line. Do the whole demo: open the door and load the line, confirm the giving set and prime, then program Med / Surg IV fluid 125 ml/h with VTBI 500 ml and start. Then set Back to PRIM to manual and add a secondary, Intermittent (other), of 260 ml/h, VTBI 130 ml, and start it.',
   setup(){ fastOn({line:false}); },
   steps:[
    {t:'Press the door key and answer ▲ Yes to "IV line clamped?"',ev:'door',where:{open:true}},
@@ -2042,7 +2042,7 @@ const SCENARIOS=[
    {t:'Press Start/Stop',ev:'start',where:{ctx:'PRIM'}},
    {t:'Scroll to SECondary, OK, then Back to PRIM: answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
    {t:'Choose New SECondary',ev:'sec-menu',where:{item:'new'}},
-   {t:'Select IV fluid from the list',ev:'ivfluid',where:{ctx:'SEC'}},
+   {t:'Select Intermittent (other) from the list (under ABC)',ev:'ivfluid',where:{ctx:'SEC',name:'Intermittent (other)'}},
    {t:'Enter Rate 260 ml/h',ev:'param',where:{field:'rate',val:260,ctx:'SEC'}},
    {t:'Enter VTBI 130 ml (Time calculates 30 min)',ev:'param',where:{field:'vtbi',val:130,ctx:'SEC'}},
    {t:'Start/Stop, then unclamp the secondary line, check bag height, Start/Stop again',ev:'sec-reminder-ok'},
@@ -2060,13 +2060,13 @@ const SCENARIOS=[
    {t:'Press Start/Stop',ev:'start',where:{ctx:'PRIM'}},
   ],
   walk:'OK at the home screen > Med / Surg (OK) > ▼ to IV fluid, OK > Rate: OK, ◀ to hundreds, ▲ 1, ◀... enter 125, OK > ▼ to VTBI, OK, enter 500, OK > Time shows 4h > Start/Stop.'},
- {ret:true,id:'ret-sec',title:'Secondary IV fluid: 260 ml/h, VTBI 130 ml',
-  brief:'A primary IV fluid (125 ml/h, 500 ml) is running. Set Back to PRIM to manual, then program a secondary IV fluid at 260 ml/h with VTBI 130 ml (30 min) and start it.',
+ {ret:true,id:'ret-sec',title:'Secondary Intermittent (other): 260 ml/h, VTBI 130 ml',
+  brief:'A primary IV fluid (125 ml/h, 500 ml) is running. Set Back to PRIM to manual, then program a secondary, Intermittent (other), at 260 ml/h with VTBI 130 ml (30 min) and start it.',
   setup(){ fastOn(); quickIvf({rate:125,vtbi:500,start:true}); },
   steps:[
    {t:'Scroll to SECondary, OK, then Back to PRIM: answer ▼ No (manual)',ev:'sec-menu',where:{item:'backto-manual'}},
    {t:'Choose New SECondary',ev:'sec-menu',where:{item:'new'}},
-   {t:'Select IV fluid from the list',ev:'ivfluid',where:{ctx:'SEC'}},
+   {t:'Select Intermittent (other) from the list (under ABC)',ev:'ivfluid',where:{ctx:'SEC',name:'Intermittent (other)'}},
    {t:'Enter Rate 260 ml/h',ev:'param',where:{field:'rate',val:260,ctx:'SEC'}},
    {t:'Enter VTBI 130 ml (Time calculates 30 min)',ev:'param',where:{field:'vtbi',val:130,ctx:'SEC'}},
    {t:'Start/Stop, then unclamp the secondary line, check bag height, Start/Stop again',ev:'sec-reminder-ok'},
